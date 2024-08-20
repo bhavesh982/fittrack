@@ -13,7 +13,8 @@ class CheckUserDataPage extends StatefulWidget {
 }
 
 class _CheckUserDataPageState extends State<CheckUserDataPage> {
-  bool _hasData = false;
+  bool _isLoading = true; // Track the loading state
+
   @override
   void initState() {
     super.initState();
@@ -21,18 +22,36 @@ class _CheckUserDataPageState extends State<CheckUserDataPage> {
   }
 
   Future<void> _checkUserData() async {
-    final uid= await FirebaseAuth.instance.currentUser!.uid.toString();
-    final docRef = await FirebaseFirestore.instance.collection('users').doc(uid);
+    final uid = FirebaseAuth.instance.currentUser!.uid.toString();
+    final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
     final snapshot = await docRef.get();
-    if(snapshot.exists && snapshot.data()!.containsKey('name')){
-     Navigator.push(context, MaterialPageRoute(builder: (context)=>const MyHomePage()));
-    }
-    else{
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>const DetailsPage()));
+
+    if (snapshot.exists && snapshot.data()!.containsKey('name')) {
+      // If user data exists, navigate to MyHomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MyHomePage()),
+      );
+    } else {
+      // If user data does not exist, navigate to DetailsPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DetailsPage()),
+      );
     }
   }
+
   @override
   Widget build(BuildContext context) {
-   return _hasData?MyHomePage():DetailsPage();
+    return Scaffold(
+      backgroundColor: Colors.black, // Set background color to black
+      body: Center(
+        child: _isLoading
+            ? const CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Spinner color
+        )
+            : Container(), // Empty container for when loading is done
+      ),
+    );
   }
 }

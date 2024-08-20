@@ -1,14 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fittrackai/Screens/auth/login.dart';
-import 'package:fittrackai/Screens/details/DetailOrHome.dart';
 import 'package:fittrackai/Screens/details/details.dart';
-import 'package:fittrackai/componenets/mybutton.dart';
-import 'package:fittrackai/componenets/textField.dart';
 import 'package:fittrackai/google/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-class SignupPage extends StatefulWidget {
 
+class SignupPage extends StatefulWidget {
   SignupPage({super.key});
 
   @override
@@ -16,14 +13,15 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final nameController=TextEditingController();
-  final emailController=TextEditingController();
-  final passwordController=TextEditingController();
-  final passwordController2=TextEditingController();
-  // sign user in method
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final passwordController2 = TextEditingController();
+
+  // Sign user up method
   void signUserup() async {
-    // show loading circle
-    if(passwordController.text!=passwordController2.text){
+    // Show loading circle
+    if (passwordController.text != passwordController2.text) {
       showDialog(
         context: context,
         builder: (context) {
@@ -32,7 +30,7 @@ class _SignupPageState extends State<SignupPage> {
             title: Center(
               child: Text(
                 'Passwords don\'t match',
-                style: TextStyle(color: Colors.red,fontSize: 13),
+                style: TextStyle(color: Colors.red, fontSize: 13),
               ),
             ),
           );
@@ -48,38 +46,40 @@ class _SignupPageState extends State<SignupPage> {
         );
       },
     );
-    // try sign in
-    Map<String,dynamic>data={
-      'name':nameController.text,
-      'email':emailController.text,
+
+    // Try sign up
+    Map<String, dynamic> data = {
+      'name': nameController.text,
+      'email': emailController.text,
     };
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email:emailController.text,
-          password: passwordController.text,
+        email: emailController.text,
+        password: passwordController.text,
       ).whenComplete(() async {
-        String uid=FirebaseAuth.instance.currentUser!.uid.toString();
-        final ref=FirebaseFirestore.instance.collection('users').doc(uid);
+        String uid = FirebaseAuth.instance.currentUser!.uid.toString();
+        final ref = FirebaseFirestore.instance.collection('users').doc(uid);
         await ref.set(data);
       });
-      // pop the loading circle
+      // Pop the loading circle
       Navigator.pop(context);
-      Navigator.push(context, MaterialPageRoute(builder: (context)=> const DetailsPage()));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const DetailsPage()));
     } on FirebaseAuthException catch (e) {
-      // pop the loading circle
+      // Pop the loading circle
       Navigator.pop(context);
-      // WRONG EMAIL
+      // Show wrong email message
       wrongEmailMessage(e.code);
     }
   }
 
-  // wrong email message popup
+  // Wrong email message popup
   void wrongEmailMessage(String msg) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.black12,
+          backgroundColor: Colors.black,
           title: Center(
             child: Text(
               'Error : $msg',
@@ -94,52 +94,100 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(220, 250, 250, 250),
+      backgroundColor: Colors.black, // Set background to black
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children:[
-                const SizedBox(height: 40,),
-                const Icon(Icons.lock,
-                  size: 100,),
-                const SizedBox(height: 30,),
-                const Text("Ready to Change your life",
-                  style: TextStyle(color: Colors.grey,
-                      fontSize: 16
-                  ),),
-                const SizedBox(height: 15,),
-                MyTextField(
+              children: [
+                const SizedBox(height: 40),
+                const Icon(
+                  Icons.lock,
+                  size: 100,
+                  color: Colors.white, // Set icon color to white
+                ),
+                const SizedBox(height: 30),
+                const Text(
+                  "Ready to Change your life",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                const SizedBox(height: 15),
+                TextField(
                   controller: nameController,
-                  hintText: 'Name',
-                  obscureText: false,
+                  style: TextStyle(color: Colors.white), // Set text color to white
+                  decoration: InputDecoration(
+                    hintText: 'Name',
+                    hintStyle: TextStyle(color: Colors.white60), // Set hint text color to slightly gray
+                    filled: true,
+                    fillColor: Colors.black, // Set background to black
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 25,),
-                MyTextField(
+                const SizedBox(height: 25),
+                TextField(
                   controller: emailController,
-                  hintText: 'Email',
-                  obscureText: false,
+                  style: TextStyle(color: Colors.white), // Set text color to white
+                  decoration: InputDecoration(
+                    hintText: 'Email',
+                    hintStyle: TextStyle(color: Colors.white60), // Set hint text color to slightly gray
+                    filled: true,
+                    fillColor: Colors.black, // Set background to black
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 25,),
-                MyTextField(
+                const SizedBox(height: 25),
+                TextField(
                   controller: passwordController,
-                  hintText: 'Password',
                   obscureText: true,
+                  style: TextStyle(color: Colors.white), // Set text color to white
+                  decoration: InputDecoration(
+                    hintText: 'Password',
+                    hintStyle: TextStyle(color: Colors.white60), // Set hint text color to slightly gray
+                    filled: true,
+                    fillColor: Colors.black, // Set background to black
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 25,),
-                MyTextField(
+                const SizedBox(height: 25),
+                TextField(
                   controller: passwordController2,
-                  hintText: 'Confirm Password',
                   obscureText: true,
+                  style: TextStyle(color: Colors.white), // Set text color to white
+                  decoration: InputDecoration(
+                    hintText: 'Confirm Password',
+                    hintStyle: TextStyle(color: Colors.white60), // Set hint text color to slightly gray
+                    filled: true,
+                    fillColor: Colors.black, // Set background to black
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 25,),
-                MyButton(
-                  title: 'Sign Up',
-                  onTap: signUserup,
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  onPressed: signUserup,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white, backgroundColor: Colors.blue, // Set button text color to white
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: Text("Sign Up"),
                 ),
-                const SizedBox(height: 40,),
+                const SizedBox(height: 40),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: Row(
@@ -147,52 +195,64 @@ class _SignupPageState extends State<SignupPage> {
                       Expanded(
                         child: Divider(
                           thickness: 0.5,
-                          color: Colors.grey,
+                          color: Colors.white60, // Set divider color to slightly gray
                         ),
                       ),
-                      Text("Or Continue with",
-                        style: TextStyle(color: Colors.grey),
+                      Text(
+                        "Or Continue with",
+                        style: TextStyle(color: Colors.white),
                       ),
                       Expanded(
                         child: Divider(
                           thickness: 0.5,
-                          color: Colors.grey,
+                          color: Colors.white60, // Set divider color to slightly gray
                         ),
                       )
                     ],
                   ),
                 ),
-                const SizedBox(height: 20,),
+                const SizedBox(height: 20),
                 GestureDetector(
-                  onTap:(){
+                  onTap: () {
                     AuthService().signInWithGoogle();
                   },
                   child: Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white),
-                          color: Colors.white60
-                      ),
-                      child: Image.asset('lib/assets/images/google.png',height: 40,)),
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white),
+                      color: Colors.black, // Set container background to black
+                    ),
+                    child: Image.asset(
+                      'lib/assets/images/google.png',
+                      height: 40,
+                      color: Colors.white, // Set image color to white
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 50,),
+                const SizedBox(height: 50),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Already have an account ?'),
-                    SizedBox(width: 4,),
+                    const Text(
+                      'Already have an account?',
+                      style: TextStyle(color: Colors.white), // Set text color to white
+                    ),
+                    const SizedBox(width: 4),
                     GestureDetector(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=> LoginPage()));
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                        );
                       },
-                      child: const Text('Login Now',
-                        style: TextStyle(
-                            color: Colors.blue
-                        ),),
+                      child: const Text(
+                        'Login Now',
+                        style: TextStyle(color: Colors.blue),
+                      ),
                     )
                   ],
-                )
+                ),
               ],
             ),
           ),

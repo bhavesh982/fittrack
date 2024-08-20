@@ -1,27 +1,15 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fittrackai/Screens/auth/auth_page.dart';
+import 'package:fittrackai/Screens/details/following.dart';
 import 'package:fittrackai/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:url_launcher/link.dart';
-
-/* Generative ai code from here*/
-
-
-
-
-
-
-
-
-
-/* Generative ai code ends from here*/
+import 'package:flutter_gemini/flutter_gemini.dart';
 
 
 Future<void> main() async {
+  Gemini.init(apiKey: KeyStore().getKey());
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   final apiKey = Platform.environment['API_KEY'];

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fittrackai/Screens/details/following.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -55,20 +57,69 @@ class ChatWidget extends StatefulWidget {
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
+  late String userName;
+  late String userGoal;
+  late String userWeight;
+  late String userHeight;
+  late String userActivity;
+  late String userMobility;
+  late String userMedical;
+  late String userDietaryRestriction;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        userName = userData['name'];
+        userGoal = userData['goal'];
+        userWeight = userData['weight'];
+        userHeight = userData['height'];
+        userActivity=userData['activity'];
+        userMobility=userData['limitedmobility'];
+        userMedical=userData['medicalcondition'];
+        userDietaryRestriction=userData['dietaryrestriction'];
+        _initializeChatModel();
+      });
+
+    }
+  }
   late final GenerativeModel _model;
-  late final ChatSession _chat;
+  ChatSession? _chat;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode(debugLabel: 'TextField');
   bool _loading = false;
-  @override
-  void initState() {
-    super.initState();
+  bool _isChatInitialized=false;
+  void _initializeChatModel() {
     _model = GenerativeModel(
-      model: 'gemini-pro',
+      model: 'gemini-1.5-pro-latest',
       apiKey: widget.apiKey,
+      systemInstruction: Content.text(
+          "You are an expert fitness trainer named Geni from India. "
+              "The user’s name is $userName, they have a goal of $userGoal, "
+              "their weight is $userWeight kg"
+              "their height is $userHeight"
+              "Their weekly activity of workout is $userActivity"
+              "their mobility problem is $userMobility"
+              "their medical problem is $userMedical"
+              "their dietary restriction is $userDietaryRestriction"
+              "Greet the user by their name and provide fitness advice tailored to their goal"
+              "Respond concisely "
+      ),
     );
-    _chat = _model.startChat();
+    setState(() {
+      _chat = _model.startChat();
+      _isChatInitialized=true;
+    });
   }
 
   void _scrollDown() {
@@ -85,7 +136,8 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final history = _chat.history.toList();
+    if(!_isChatInitialized)return const Center(child: CircularProgressIndicator(),);
+    final history = _chat!.history.toList();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -121,7 +173,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                     autofocus: true,
                     focusNode: _textFieldFocus,
                     decoration:
-                    textFieldDecoration(context, 'Lets Talk...'),
+                    textFieldDecoration(context, 'Say hi...'),
                     controller: _textController,
                   ),
                 ),
@@ -158,7 +210,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       _loading = true;
     });
     try {
-      final response = await _chat.sendMessage(
+      final response = await _chat!.sendMessage(
         Content.text(KeyStore().getPromptHelp(message)+message),
       );
       final text = response.text;
@@ -220,7 +272,7 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return !isFromUser?Row(
+    return Row(
       mainAxisAlignment:
       isFromUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
@@ -242,7 +294,7 @@ class MessageWidget extends StatelessWidget {
           ),
         ),
       ],
-    ):SizedBox();
+    );
   }
 }
 
